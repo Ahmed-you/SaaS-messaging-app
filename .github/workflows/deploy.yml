@@ -7,7 +7,15 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy to Laravel Cloud
+        env:
+          DEPLOY_HOOK: ${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}
         run: |
-          curl -X POST "${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}?commit_hash=${{ github.sha }}"
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "Error: LARAVEL_CLOUD_DEPLOY_HOOK secret is empty or missing"
+            exit 1
+          fi
+
+          curl -fsS -X POST "${DEPLOY_HOOK}?commit_hash=${GITHUB_SHA}"
